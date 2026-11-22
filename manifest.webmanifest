@@ -1,20 +1,24 @@
 {
-  "name": "Trening wiedzy",
-  "short_name": "Trening",
+  "name": "Trening wiedzy – quizy i powtórki",
+  "short_name": "Trening wiedzy",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#172554",
+  "description": "Aplikacja do nauki, testów do skutku i fiszek offline.",
   "icons": [
     {
       "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }

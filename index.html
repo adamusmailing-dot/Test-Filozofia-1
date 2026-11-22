@@ -1,13 +1,131 @@
-<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#172554"><link rel="manifest" href="manifest.webmanifest"><title>Trening wiedzy</title><style>
-body{margin:0;background:#f1f5f9;color:#172033;font:16px system-ui}header{background:#172554;color:white;padding:18px}main{max-width:720px;margin:auto;padding:14px}.box{background:white;border:1px solid #dbe3ef;border-radius:16px;padding:16px;margin:12px 0}button,select,input,textarea{font:inherit;padding:11px;border-radius:10px;border:1px solid #cbd5e1}button{background:#2563eb;color:white;border:0;margin:4px;cursor:pointer}.alt{background:#e2e8f0;color:#172554}.tabs{display:flex;flex-wrap:wrap}.choice{display:block;padding:10px;border:1px solid #dbe3ef;border-radius:10px;margin:7px 0}.muted{color:#64748b;font-size:13px}.hide{display:none}.good{background:#dcfce7;padding:12px;border-radius:10px}.bad{background:#fee2e2;padding:12px;border-radius:10px}textarea{width:95%}h2{font-size:19px}
-</style></head><body><header><b>Trening wiedzy</b><div class="muted" style="color:#cbd5e1">Powtórki, fiszki i testy • offline</div></header><main>
-<div class="tabs"><button data-tab="learn">Nauka</button><button data-tab="quiz">Test</button><button data-tab="cards">Fiszki</button><button data-tab="manage">Moje materiały</button></div>
-<section id="learn"><div class="box"><h2>Wybierz materiał</h2><label>Przedmiot <select id="sub"></select></label> <label>Sprawdzian <select id="test"></select></label><p><button id="goLearn">Rozpocznij naukę</button><button class="alt" id="goCards">Fiszki</button></p></div><div class="box" id="learnArea">Wybierz zestaw i rozpocznij powtórkę.</div></section>
-<section id="quiz" class="hide"><div class="box"><h2>Tryb sprawdzianu</h2><button id="goQuiz">Rozpocznij test</button><div id="quizArea"></div></div></section>
-<section id="cards" class="hide"><div class="box"><h2>Fiszki</h2><div id="cardArea">Uruchom fiszki w zakładce Nauka.</div></div></section>
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#172554">
+<meta name="description" content="Powtórki, testy i fiszki szkolne">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon-192.png">
+<title>Trening wiedzy</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#172033;background:#f1f5f9}
+*{box-sizing:border-box}body{margin:0}header{background:#172554;color:#fff;padding:17px 18px}
+header b{font-size:21px}main{max-width:760px;margin:auto;padding:14px 14px 36px}
+.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+button,select,input,textarea{font:inherit;padding:11px;border:1px solid #cbd5e1;border-radius:11px}
+button{cursor:pointer;border:0;background:#2563eb;color:white;font-weight:650;margin:4px 3px 4px 0}
+button.secondary{background:#e2e8f0;color:#172554}button:disabled{opacity:.45;cursor:not-allowed}
+.tabs button{background:#dce5f3;color:#172554}.tabs button.active{background:#2563eb;color:white}
+.panel{background:white;border:1px solid #dbe3ef;border-radius:16px;padding:16px;margin:12px 0}
+label.field{display:block;font-size:14px;font-weight:650;margin:10px 0 5px}
+select,input[type=text],textarea{width:100%;background:#fff}
+.choice{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid #dbe3ef;border-radius:11px;margin:8px 0;background:#fff;cursor:pointer}
+.choice input{width:20px;height:20px;margin:1px 0 0;flex:none;accent-color:#2563eb}
+.choice.selected{border-color:#2563eb;background:#eff6ff}
+.muted{color:#64748b;font-size:13px}.hide{display:none!important}
+.good{background:#dcfce7;color:#14532d;padding:13px;border-radius:11px;margin:12px 0}
+.bad{background:#fee2e2;color:#7f1d1d;padding:13px;border-radius:11px;margin:12px 0}
+.progress{height:8px;background:#e2e8f0;border-radius:10px;overflow:hidden;margin:10px 0 15px}
+.progress>div{height:100%;background:#2563eb;width:0}
+.pill{display:inline-block;font-size:12px;color:#334155;background:#e8eef9;padding:4px 8px;border-radius:20px}
+.stat{font-size:28px;font-weight:800;color:#172554}
+.rankrow{display:grid;grid-template-columns:32px 1fr auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid #e2e8f0}
+.rankrow:last-child{border-bottom:0}.ranknum{font-weight:800;color:#64748b}
+textarea{width:100%}h2{font-size:20px;margin:5px 0 12px}h3{font-size:18px}
+footer{text-align:center;color:#64748b;font-size:12px;padding:18px}
+@media(min-width:620px){.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}}
+</style>
+</head>
+<body>
+<header><b>📘 Trening wiedzy</b><div class="muted" style="color:#cbd5e1">Powtórki, fiszki i sprawdziany • Android</div></header>
+<main>
+<nav class="tabs">
+<button data-tab="learn" class="active">Nauka</button>
+<button data-tab="quiz">Test</button>
+<button data-tab="cards">Fiszki</button>
+<button data-tab="manage">Moje materiały</button>
+</nav>
+
+<section id="learn">
+  <div class="panel">
+    <h2>Wybierz materiał</h2>
+    <div class="two">
+      <div><label class="field" for="sub">Przedmiot</label><select id="sub"></select></div>
+      <div><label class="field" for="test">Sprawdzian</label><select id="test"></select></div>
+    </div>
+    <button id="goLearn">Rozpocznij naukę</button>
+    <button class="secondary" id="goCards">Fiszki</button>
+  </div>
+  <div class="panel" id="learnArea">Wybierz zestaw i rozpocznij powtórkę.</div>
+</section>
+
+<section id="quiz" class="hide">
+  <div class="panel">
+    <h2>Test do skutku</h2>
+    <p class="muted">Każde pytanie pozwala zaznaczyć kilka odpowiedzi. Po każdej rundzie wrócą tylko pytania, w których zestaw zaznaczeń był niepoprawny. Test kończy się po uzyskaniu kompletu poprawnych odpowiedzi.</p>
+    <label class="field" for="playerName">Nazwa do rankingu</label>
+    <input id="playerName" type="text" maxlength="24" placeholder="np. Rafał" value="Uczeń">
+    <button id="goQuiz">Rozpocznij test</button>
+    <div id="quizArea"></div>
+    <div id="rankingPanel" class="panel">
+      <h3>Ranking – najszybsze ukończenia</h3>
+      <p class="muted">Ranking zapisuje się lokalnie na tym urządzeniu i jest osobny dla każdego sprawdzianu.</p>
+      <div id="rankingList"></div>
+    </div>
+  </div>
+</section>
+
+<section id="cards" class="hide">
+  <div class="panel"><h2>Fiszki</h2><div id="cardArea">Uruchom fiszki w zakładce Nauka.</div></div>
+</section>
+
 <section id="manage" class="hide">
-<div class="box"><h2>Dodaj przedmiot</h2><input id="newSub" placeholder="Nazwa przedmiotu"><button id="addSub">Dodaj</button></div>
-<div class="box"><h2>Dodaj sprawdzian</h2><select id="manageSub"></select><input id="newTest" placeholder="Nazwa sprawdzianu"><button id="addTest">Utwórz</button></div>
-<div class="box"><h2>Dodaj pytanie</h2><select id="qSub"></select><select id="qTest"></select><p><input id="qText" placeholder="Treść pytania" style="width:95%"></p><p class="muted">Odpowiedzi – każda w osobnym wierszu</p><textarea id="qOpts" rows="4"></textarea><p><input id="qCorrect" placeholder="Numery poprawnych opcji, np. 1 lub 1,3"></p><textarea id="qExp" rows="2" placeholder="Wyjaśnienie (opcjonalnie)"></textarea><p><label><input id="multi" type="checkbox"> Wiele poprawnych odpowiedzi</label></p><button id="addQ">Zapisz pytanie</button></div>
-<div class="box"><h2>Kopia zapasowa</h2><button id="export">Eksportuj JSON</button><button class="alt" id="import">Importuj JSON</button><input type="file" id="file" accept=".json" class="hide"><p class="muted">Materiały zapisują się lokalnie na urządzeniu. Eksportuj kopię przed importem.</p></div><div class="box"><h2>Zestawy</h2><div id="list"></div></div></section></main>
-<script src="app.js"></script><script>if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');</script></body></html>
+  <div class="panel">
+    <h2>Dodaj przedmiot</h2>
+    <input id="newSub" type="text" placeholder="Nazwa przedmiotu">
+    <button id="addSub">Dodaj przedmiot</button>
+  </div>
+  <div class="panel">
+    <h2>Dodaj sprawdzian</h2>
+    <label class="field" for="manageSub">Przedmiot</label><select id="manageSub"></select>
+    <input id="newTest" type="text" placeholder="Nazwa sprawdzianu">
+    <button id="addTest">Utwórz sprawdzian</button>
+  </div>
+  <div class="panel">
+    <h2>Dodaj pytanie</h2>
+    <label class="field" for="qSub">Przedmiot</label><select id="qSub"></select>
+    <label class="field" for="qTest">Sprawdzian</label><select id="qTest"></select>
+    <input id="qText" type="text" placeholder="Treść pytania">
+    <label class="field" for="qOpts">Odpowiedzi – każda w osobnym wierszu</label>
+    <textarea id="qOpts" rows="4"></textarea>
+    <label class="field" for="qCorrect">Numery wszystkich poprawnych odpowiedzi (np. 1 albo 1,3)</label>
+    <input id="qCorrect" type="text" placeholder="1,3">
+    <label class="field" for="qExp">Wyjaśnienie</label><textarea id="qExp" rows="2" placeholder="Krótkie wyjaśnienie (opcjonalnie)"></textarea>
+    <button id="addQ">Zapisz pytanie</button>
+    <p class="muted">W teście wszystkie odpowiedzi są wielokrotnego wyboru – również pytania z jedną poprawną odpowiedzią.</p>
+  </div>
+  <div class="panel">
+    <h2>Kopia zapasowa</h2>
+    <button id="export">Eksportuj zestawy</button>
+    <button class="secondary" id="import">Importuj JSON</button>
+    <input type="file" id="file" accept="application/json" class="hide">
+    <p class="muted">Materiały są przechowywane lokalnie. Eksportuj kopię przed importem.</p>
+  </div>
+  <div class="panel"><h2>Twoje materiały</h2><div id="list"></div></div>
+</section>
+<footer>Wyniki i ranking są zapisywane lokalnie w przeglądarce tego urządzenia.</footer>
+</main>
+<script src="./app.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('./sw.js', {updateViaCache:'none'});
+      reg.update();
+    } catch (e) { console.warn('Service worker:', e); }
+  });
+}
+</script>
+</body>
+</html>
